@@ -342,7 +342,7 @@ def sendProvisioningDataToSiH(Map messageData) {
 	def params = [
     	path: "/api/Provision",
         body: dataJson,
-        uri: "http://ec2-3-17-173-36.us-east-2.compute.amazonaws.com/",
+        uri: "http://apipub.safeinhome.com/",
         contentType: "application/json"
 	]
 
