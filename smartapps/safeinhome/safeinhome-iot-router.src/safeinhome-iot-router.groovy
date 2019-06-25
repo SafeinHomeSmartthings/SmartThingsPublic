@@ -167,7 +167,7 @@ def pressurePadHandler(evt) {
     log.debug evt.value
     
     def accumulatedSensorData = atomicState.accumulatedSensorData
-    accumulatedSensorData.add(SensorMessage(evt.getDevice().id, evt.getDevice().label, "BED_PRESENCE", new Date(), isOpen, "", "False"))
+    accumulatedSensorData.add(SensorMessage(evt.getDevice().id, evt.getDevice().label, "BED_PRESENCE", new Date(), isOpen, "100", "False"))
     atomicState.accumulatedSensorData = accumulatedSensorData
 }
 
@@ -183,7 +183,7 @@ def pillBoxHandler(evt) {
     }
 
 	def accumulatedSensorData = atomicState.accumulatedSensorData
-    accumulatedSensorData.add(SensorMessage(evt.getDevice().id, evt.getDevice().label, "PILLS", new Date(), eventValue.toString(), "", "False"))
+    accumulatedSensorData.add(SensorMessage(evt.getDevice().id, evt.getDevice().label, "PILLS", new Date(), eventValue.toString(), "100", "False"))
     atomicState.accumulatedSensorData = accumulatedSensorData
 }
 
@@ -211,7 +211,7 @@ def addBedPadStatusToAccumulation() {
     pressurePad.each { device ->
         def isOpen = StringFromBool(device.contactState == "closed")
 
-        accumulatedSensorData.add(SensorMessage(device.id, device.label, "BED_PRESENCE", new Date(), isOpen, "", "True"))
+        accumulatedSensorData.add(SensorMessage(device.id, device.label, "BED_PRESENCE", new Date(), isOpen, "100", "True"))
     }
 
     atomicState.accumulatedSensorData = accumulatedSensorData
