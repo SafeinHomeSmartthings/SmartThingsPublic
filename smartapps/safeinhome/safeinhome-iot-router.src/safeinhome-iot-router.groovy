@@ -209,6 +209,8 @@ def sendBedPadStatus() {
     def accumulatedSensorData = atomicState.accumulatedSensorData
     
     pressurePad.each { device ->
+        def isOpen = StringFromBool(device.contactState == "closed")
+
         accumulatedSensorData.add(SensorMessage(device.id, device.label, "BED_PRESENCE", new Date(), isOpen, "", "False"))
     }
 
@@ -340,7 +342,7 @@ def sendProvisioningDataToSiH(Map messageData) {
 	def params = [
     	path: "/api/Provision",
         body: dataJson,
-        uri: "http://apipub.safeinhome.com/",
+        uri: "http://ec2-3-17-173-36.us-east-2.compute.amazonaws.com/",
         contentType: "application/json"
 	]
 
