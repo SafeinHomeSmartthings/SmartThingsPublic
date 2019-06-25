@@ -112,7 +112,7 @@ def initialize() {
     runEvery15Minutes(sendHeartbeatToSiH, [data: false])
     //Send temperature Data
     runEvery10Minutes(addTempDataToAccumulation)
-    runEvery10Minutes(sendBedPadStatus)
+    runEvery10Minutes(addBedPadStatusToAccumulation)
 }
 
 def StringFromBool(boolVal) {
@@ -164,9 +164,9 @@ def tamperHandler(evt) {
 def pressurePadHandler(evt) {
     def isOpen = StringFromBool(evt.value == "closed")
     
-    log.debug "fire!!"
-
-	def accumulatedSensorData = atomicState.accumulatedSensorData
+    log.debug evt.value
+    
+    def accumulatedSensorData = atomicState.accumulatedSensorData
     accumulatedSensorData.add(SensorMessage(evt.getDevice().id, evt.getDevice().label, "BED_PRESENCE", new Date(), isOpen, "", "False"))
     atomicState.accumulatedSensorData = accumulatedSensorData
 }
@@ -205,13 +205,13 @@ def addTempDataToAccumulation() {
     atomicState.accumulatedSensorData = accumulatedSensorData;
 }
 
-def sendBedPadStatus() {
+def addBedPadStatusToAccumulation() {
     def accumulatedSensorData = atomicState.accumulatedSensorData
     
     pressurePad.each { device ->
         def isOpen = StringFromBool(device.contactState == "closed")
 
-        accumulatedSensorData.add(SensorMessage(device.id, device.label, "BED_PRESENCE", new Date(), isOpen, "", "False"))
+        accumulatedSensorData.add(SensorMessage(device.id, device.label, "BED_PRESENCE", new Date(), isOpen, "", "True"))
     }
 
     atomicState.accumulatedSensorData = accumulatedSensorData
@@ -342,7 +342,7 @@ def sendProvisioningDataToSiH(Map messageData) {
 	def params = [
     	path: "/api/Provision",
         body: dataJson,
-        uri: "http://ec2-3-17-173-36.us-east-2.compute.amazonaws.com/",
+        uri: "http://apipub.safeinhome.com/",
         contentType: "application/json"
 	]
 
