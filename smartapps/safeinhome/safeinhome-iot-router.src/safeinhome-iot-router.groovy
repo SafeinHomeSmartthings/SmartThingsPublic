@@ -175,10 +175,10 @@ def pillBoxHandler(evt) {
     def eventValue = 0
     
     if(evt.value == "open") {
-    	eventValue = 255
+    	eventValue = 0
         log.debug "FIRE ON"
     } else {
-    	eventValue = 127
+    	eventValue = 64
         log.debug "FIRE OFF"
     }
 
@@ -392,7 +392,22 @@ def getHeartbeatSensorMessages(ArrayList sensorList) {
     def sensorMessages = []
 
     sensorList.each { device -> 
-        sensorMessages.add(SensorMessage(device.id, device.label, device.name, new Date(), device.batteryState.value, "True"))
+        def hasBattery = false
+
+        def caps = device.capabilities
+        caps.each { cap -> 
+            if(cap.name == "Battery") {
+                hasBattery = true
+            }
+        }
+
+        def batteryState = "100"
+
+        if(hasBattery) {
+            batteryState = device.batteryState.value
+        }
+
+        sensorMessages.add(SensorMessage(device.id, device.label, device.name, new Date(), batteryState, "True"))
     }
 
     return sensorMessages
