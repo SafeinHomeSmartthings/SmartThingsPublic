@@ -25,12 +25,8 @@ definition(
 
 
 preferences {
-	section("Enter External User Code") {
-		input "externUserCode", "text"
-	}
-    
-    section("Enter External Network Code") {
-		input "externNetworkCode", "text"
+	section("Enter Provisioning Code") {
+		input "provisionCode", "text"
 	}
 
 	section("Select Door Sensors") {
@@ -97,9 +93,11 @@ def initialize() {
     subscribe(pressurePad, "contact", pressurePadHandler)
     subscribe(pillBox, "contact", pillBoxHandler)
 
+    //
+
 	if(shouldProvision) {
     	//provision
-    	def provMess = ProvisioningMessage(location.hubs[0].id, provisionSensors)
+    	def provMess = ProvisioningMessage(location.hubs[0].id, provisionSensors, provisionCode)
     	sendProvisioningDataToSiH(provMess)
     }
 
@@ -217,7 +215,7 @@ def addBedPadStatusToAccumulation() {
     atomicState.accumulatedSensorData = accumulatedSensorData
 }
 
-def ProvisioningMessage(String hubId, ArrayList sensorList) {
+def ProvisioningMessage(String hubId, ArrayList sensorList, String provisionCode) {
     def sensorListToProvision = []
 
     sensorList.each { device -> 
@@ -229,9 +227,8 @@ def ProvisioningMessage(String hubId, ArrayList sensorList) {
         name: location.hubs[0].name,
         uuid: hubId,
         locationName: location.name,
-        externUserCode: externUserCode,
         sensors: sensorListToProvision,
-        hardwareAccountCode: externNetworkCode
+        provisionCode: provisioniCode
     ]
 
     return provisioningMessage
@@ -304,6 +301,7 @@ def sendDataToSiH() {
         gatewayMessage: gatewayData,
         sensorMessages: sensorData
     ]
+    
     def dataJson = groovy.json.JsonOutput.toJson(msgData)
 
     log.debug "data: $dataJson"
@@ -407,37 +405,10 @@ def getHeartbeatSensorMessages(ArrayList sensorList) {
             batteryState = device.batteryState.value
         }
 
-        sensorMessages.add(SensorMessage(device.id, device.label, device.name, new Date(), batteryState, "True"))
+        (String senId, String senName, String sType, Date msgDt, String data, String batteryLevel, String heartbeat)
+
+        sensorMessages.add(SensorMessage(device.id, device.label, "HEARTBEAT", new Date(), "True", batteryState, "True"))
     }
 
     return sensorMessages
 }
-
-
-// This code will need to be implemented to properly enact security measures on the AWS side...
-// /**
-//   * @param secretKey
-//   * @param data
-//   * @return HMAC/SHA256 representation of the given string
-//   */
-// def hmac_sha256(String secretKey, String data) {
-//     try {
-//         javax.crypto.spec.SecretKeySpec secretKeySpec = new javax.crypto.spec.SecretKeySpec(secretKey.getBytes("UTF-8"), "HmacSHA256")
-//         javax.crypto.Mac mac = javax.crypto.Mac.getInstance("HmacSHA256")
-//         mac.init(secretKeySpec)
-//         byte[] digest = mac.doFinal(data.getBytes("UTF-8"))
-//         return byteArrayToString(digest)
-//     } catch (java.security.InvalidKeyException e) {
-//         throw new RuntimeException("Invalid key exception while converting to HMac SHA256")
-//     }
-// }
- 
-// private def byteArrayToString(byte[] data) {
-//  BigInteger bigInteger = new BigInteger(1, data)
-//  String hash = bigInteger.toString(16)
-//  //Zero pad it
-//  while (hash.length() < 64) {
-//   hash = "0" + hash
-//  }
-//  return hash
-// }
